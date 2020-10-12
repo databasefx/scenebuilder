@@ -70,9 +70,10 @@ public class WelcomeDialogWindowController extends TemplatesBaseWindowController
     private SceneBuilderApp sceneBuilderApp;
 
     private WelcomeDialogWindowController() {
-        super(WelcomeDialogWindowController.class.getResource("WelcomeWindow.fxml"), //NOI18N
+        //NOI18N
+        super(WelcomeDialogWindowController.class.getResource("WelcomeWindow.fxml"),
                 I18N.getBundle(),
-                null); // We want it to be a top level window so we're setting the owner to null.
+                null);
 
         sceneBuilderApp = SceneBuilderApp.getSingleton();
     }
