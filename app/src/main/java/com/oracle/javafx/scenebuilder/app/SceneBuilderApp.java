@@ -133,7 +133,7 @@ public class SceneBuilderApp extends Application implements AppPlatform.AppNotif
 
         // set design time flag
         java.beans.Beans.setDesignTime(true);
-        
+
         // SB-270
         windowList.addListener((ListChangeListener.Change<? extends DocumentWindowController> c) -> {
             while (c.next()) {
@@ -145,11 +145,11 @@ public class SceneBuilderApp extends Application implements AppPlatform.AppNotif
                 }
             }
         });
-        
+
         /*
          * We spawn our two threads for handling background startup.
          */
-        final Runnable p0 = () -> backgroundStartPhase0();
+        final Runnable p0 = this::backgroundStartPhase0;
         final Runnable p1 = () -> {
             try {
                 launchLatch.await();
@@ -243,7 +243,7 @@ public class SceneBuilderApp extends Application implements AppPlatform.AppNotif
                 break;
 
             case CLOSE_FRONT_WINDOW:
-                result = windowList.isEmpty() == false;
+                result = !windowList.isEmpty();
                 break;
 
             case USE_DEFAULT_THEME:
@@ -351,7 +351,7 @@ public class SceneBuilderApp extends Application implements AppPlatform.AppNotif
         setApplicationUncaughtExceptionHandler();
 
         try {
-            if (AppPlatform.requestStart(this, getParameters()) == false) {
+            if (!AppPlatform.requestStart(this, getParameters())) {
                 // Start has been denied because another instance is running.
                 Platform.exit();
             }
@@ -388,8 +388,8 @@ public class SceneBuilderApp extends Application implements AppPlatform.AppNotif
         MavenPreferences mavenPreferences = PreferencesController.getSingleton().getMavenPreferences();
         // Creates the user library
         userLibrary = new UserLibrary(AppPlatform.getUserLibraryFolder(),
-                () -> mavenPreferences.getArtifactsPathsWithDependencies(),
-                () -> mavenPreferences.getArtifactsFilter());
+                mavenPreferences::getArtifactsPathsWithDependencies,
+                mavenPreferences::getArtifactsFilter);
 
         userLibrary.setOnUpdatedJarReports(jarReports -> {
             boolean shouldShowImportGluonJarAlert = false;
@@ -496,7 +496,7 @@ public class SceneBuilderApp extends Application implements AppPlatform.AppNotif
     @Override
     public void handleOpenFilesAction(List<String> files) {
         assert files != null;
-        assert files.isEmpty() == false;
+        assert !files.isEmpty();
 
         final List<File> fileObjs = new ArrayList<>();
         for (String file : files) {
@@ -504,7 +504,7 @@ public class SceneBuilderApp extends Application implements AppPlatform.AppNotif
         }
 
         EditorController.updateNextInitialDirectory(fileObjs.get(0));
-        
+
         // Fix for #45
         if (userLibrary.isFirstExplorationCompleted()) {
             performOpenFiles(fileObjs, null);
@@ -538,14 +538,14 @@ public class SceneBuilderApp extends Application implements AppPlatform.AppNotif
         /*
          * Note : this callback is called on Mac OS X only when the user
          * selects the 'Quit App' command in the Application menu.
-         * 
+         *
          * Before calling this callback, FX automatically sends a close event
          * to each open window ie DocumentWindowController.performCloseAction()
          * is invoked for each open window.
-         * 
+         *
          * When we arrive here, windowList is empty if the user has confirmed
          * the close operation for each window : thus exit operation can
-         * be performed. If windowList is not empty,  this means the user has 
+         * be performed. If windowList is not empty,  this means the user has
          * cancelled at least one close operation : in that case, exit operation
          * should be not be executed.
          */
@@ -596,7 +596,7 @@ public class SceneBuilderApp extends Application implements AppPlatform.AppNotif
         fileChooser.setInitialDirectory(EditorController.getNextInitialDirectory());
         final List<File> fxmlFiles = fileChooser.showOpenMultipleDialog(null);
         if (fxmlFiles != null) {
-            assert fxmlFiles.isEmpty() == false;
+            assert !fxmlFiles.isEmpty();
             EditorController.updateNextInitialDirectory(fxmlFiles.get(0));
             performOpenFiles(fxmlFiles, fromWindow);
         }
@@ -642,7 +642,7 @@ public class SceneBuilderApp extends Application implements AppPlatform.AppNotif
     private void performOpenFiles(List<File> fxmlFiles,
                                   DocumentWindowController fromWindow) {
         assert fxmlFiles != null;
-        assert fxmlFiles.isEmpty() == false;
+        assert !fxmlFiles.isEmpty();
 
         final Map<File, IOException> exceptions = new HashMap<>();
         for (File fxmlFile : fxmlFiles) {
@@ -713,7 +713,7 @@ public class SceneBuilderApp extends Application implements AppPlatform.AppNotif
         for (DocumentWindowController dwc : windowList) {
             if (dwc.getEditorController().isTextEditingSessionOnGoing()) {
                 // Check if we can commit the editing session
-                if (dwc.getEditorController().canGetFxmlText() == false) {
+                if (!dwc.getEditorController().canGetFxmlText()) {
                     // Commit failed
                     return;
                 }
@@ -837,34 +837,34 @@ public class SceneBuilderApp extends Application implements AppPlatform.AppNotif
     private String getToolStylesheet() {
         return ResourceUtils.getToolStylesheet(toolTheme);
     }
-    
-    
+
+
     /*
      * Background startup
-     * 
+     *
      * To speed SB startup, we create two threads which anticipate some
      * initialization tasks and offload the JFX thread:
      *  - 'Phase 0' thread executes tasks that do not require JFX initialization
      *  - 'Phase 1' thread executes tasks that requires JFX initialization
-     * 
+     *
      * Tasks executed here must be carefully chosen:
      * 1) they must be thread-safe
      * 2) they should be order-safe : whether they are executed in background
      *    or by the JFX thread should make no difference.
-     * 
+     *
      * Currently we simply anticipate creation of big singleton instances
      * (like Metadata, Preferences...)
      */
 
     private void backgroundStartPhase0() {
-        assert Platform.isFxApplicationThread() == false; // Warning 
+        assert !Platform.isFxApplicationThread(); // Warning
 
         PreferencesController.getSingleton();
         Metadata.getMetadata();
     }
 
     private void backgroundStartPhase2() {
-        assert Platform.isFxApplicationThread() == false; // Warning 
+        assert !Platform.isFxApplicationThread(); // Warning
         assert launchLatch.getCount() == 0; // i.e JavaFX is initialized
 
         BuiltinLibrary.getLibrary();

@@ -128,7 +128,7 @@ public class AppPlatform {
         }
         
         final boolean result;
-        messageBox = new MessageBox<>(getMessageBoxFolder(), MessageBoxMessage.class, 1000 /* ms */);
+        messageBox = new MessageBox<>(getMessageBoxFolder(), MessageBoxMessage.class, 1000);
         if (messageBox.grab(new MessageBoxDelegate(notificationHandler))) {
             notificationHandler.handleLaunch(parameters.getUnnamed());
             result = true;
