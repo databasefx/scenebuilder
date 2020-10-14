@@ -61,11 +61,10 @@ import java.nio.file.StandardCopyOption;
  */
 public class MessageBox<T extends Serializable> {
 
-    public static final long NAP_TIME = 100; // ms
+    public static final long NAP_TIME = 100;
 
     final private String folder;
     final private Class<T> messageClass;
-    // milliseconds
     final int pollingTime;
     final Path messageFile;
     final FileMutex boxMutex;
@@ -134,8 +133,8 @@ public class MessageBox<T extends Serializable> {
 
 
     public void sendMessage(T message) throws IOException, InterruptedException {
-        assert boxMutex.isLocked() == false;
-        assert messageMutex.isLocked() == false;
+        assert !boxMutex.isLocked();
+        assert !messageMutex.isLocked();
 
         final Path transientFile = Files.createTempFile(Paths.get(folder), null, null);
         Files.write(transientFile, serializeMessage(message));
@@ -144,7 +143,7 @@ public class MessageBox<T extends Serializable> {
         boolean retry;
         int accessDeniedCount = 0;
         do {
-            if (Files.exists(messageFile) == false) {
+            if (!Files.exists(messageFile)) {
                 try {
                     Files.move(transientFile, messageFile, StandardCopyOption.ATOMIC_MOVE);
                     retry = false;

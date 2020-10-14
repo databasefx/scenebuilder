@@ -57,9 +57,7 @@ artifacts {
 }
 
 apply plugin: 'maven'
-gluonClient {
-    target = "android"
-}
+
 uploadArchives {
     repositories {
         mavenDeployer {

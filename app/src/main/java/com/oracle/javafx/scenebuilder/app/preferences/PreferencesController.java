@@ -107,7 +107,7 @@ public class PreferencesController extends PreferencesControllerBase{
 
         // Cleanup document preferences at start time : 
         final String items = applicationRootPreferences.get(RECENT_ITEMS, null); //NOI18N
-        if (items != null && items.isEmpty() == false) {
+        if (items != null && !items.isEmpty()) {
             // Remove document preferences node if needed
             try {
                 final String[] childrenNames = documentsRootPreferences.childrenNames();

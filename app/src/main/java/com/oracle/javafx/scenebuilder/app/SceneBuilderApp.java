@@ -373,7 +373,6 @@ public class SceneBuilderApp extends Application implements AppPlatform.AppNotif
 
         logTimestamp(ACTION.START);
 
-
     }
 
     /*
@@ -421,7 +420,7 @@ public class SceneBuilderApp extends Application implements AppPlatform.AppNotif
             updateImportedGluonJars(jarReports);
         });
 
-        userLibrary.explorationCountProperty().addListener((ChangeListener<Number>) (ov, t, t1) -> userLibraryExplorationCountDidChange());
+        userLibrary.explorationCountProperty().addListener((ov, t, t1) -> userLibraryExplorationCountDidChange());
 
         userLibrary.startWatching();
 
@@ -790,8 +789,6 @@ public class SceneBuilderApp extends Application implements AppPlatform.AppNotif
     }
 
     private enum ACTION {START, STOP}
-
-    ;
 
     private void logTimestamp(ACTION type) {
         switch (type) {
